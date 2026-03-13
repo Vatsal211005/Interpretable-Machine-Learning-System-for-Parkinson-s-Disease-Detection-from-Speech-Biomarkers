@@ -1,20 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi import Request
+from pydantic import BaseModel
 import joblib
 import numpy as np
+import shap
+import pandas as pd
 
 app = FastAPI()
 
+# templates + static
 templates = Jinja2Templates(directory="templates")
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# load model artifacts
 model = joblib.load("models/model.pkl")
 scaler = joblib.load("models/scaler.pkl")
 selector = joblib.load("models/selector.pkl")
+
+# SHAP explainer
+explainer = shap.TreeExplainer(model)
+
+
+# request schema
+class FeatureInput(BaseModel):
+    features: list
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -23,13 +34,40 @@ def home(request: Request):
 
 
 @app.post("/predict")
-def predict(features: list):
+def predict(data: FeatureInput):
 
-    arr = np.array(features).reshape(1,-1)
+    # convert to numpy
+    arr = np.array(data.features).reshape(1, -1)
 
-    arr = scaler.transform(arr)
-    arr = selector.transform(arr)
+    # apply preprocessing
+    arr_scaled = scaler.transform(arr)
+    arr_selected = selector.transform(arr_scaled)
 
-    pred = model.predict(arr)
+    # prediction
+    prediction = int(model.predict(arr_selected)[0])
 
-    return {"prediction": int(pred[0])}
+    # probability
+    prob = float(model.predict_proba(arr_selected)[0][1])
+
+    # SHAP explanation
+    shap_values = explainer.shap_values(arr_selected)
+
+    shap_values = shap_values[0]
+
+    # top contributing features
+    importance = np.abs(shap_values)
+    top_indices = np.argsort(importance)[-10:][::-1]
+
+    explanation = [
+        {
+            "feature_index": int(i),
+            "impact": float(shap_values[i])
+        }
+        for i in top_indices
+    ]
+
+    return {
+        "prediction": prediction,
+        "probability": prob,
+        "top_contributions": explanation
+    }

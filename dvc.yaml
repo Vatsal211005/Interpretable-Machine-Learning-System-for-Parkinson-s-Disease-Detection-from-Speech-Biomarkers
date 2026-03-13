@@ -1,0 +1,17 @@
+stages:
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - data/pd_speech_features.csv
+    outs:
+      - models/model.pkl
+
+  explain:
+    cmd: python src/explain.py
+    deps:
+      - src/explain.py
+      - models/model.pkl
+    outs:
+      - static/feature_importance.png
