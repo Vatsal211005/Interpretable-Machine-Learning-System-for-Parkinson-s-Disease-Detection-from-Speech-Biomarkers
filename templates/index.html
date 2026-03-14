@@ -1,99 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-
-<title>Parkinson Detection System</title>
-
-<link rel="stylesheet" href="/static/style.css">
-
-<!-- Chart.js for SHAP visualization -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parkinson Detection System</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-<h1>Interpretable Parkinson Detection System</h1>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">AI Diagnostic Tool</div>
+    <h1>Parkinson Detection<br>System</h1>
+    <p class="header-subtitle">Machine learning–powered analysis and prediction</p>
+  </div>
 
-<div class="tabs">
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="active" onclick="openTab('importance', this)">Feature Importance</button>
+    <button onclick="openTab('bias', this)">Bias Variance</button>
+    <button onclick="openTab('prediction', this)">Prediction</button>
+  </div>
 
-<button onclick="openTab('importance')">Feature Importance</button>
-<button onclick="openTab('bias')">Bias-Variance Curve</button>
-<button onclick="openTab('prediction')">Prediction</button>
+  <!-- Feature Importance Tab -->
+  <div id="importance" class="tabcontent active">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <h2>Feature Importance</h2>
+      </div>
+      <div class="img-wrapper">
+        <img src="/static/feature_importance.png" alt="Feature Importance Chart">
+      </div>
+    </div>
+  </div>
 
-</div>
+  <!-- Bias Variance Tab -->
+  <div id="bias" class="tabcontent">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📈</div>
+        <h2>Bias Variance Curve</h2>
+      </div>
+      <div class="img-wrapper">
+        <img src="/static/learning_curve.png" alt="Learning Curve">
+      </div>
+    </div>
+  </div>
 
-<!-- ================= FEATURE IMPORTANCE ================= -->
+  <!-- Prediction Tab -->
+  <div id="prediction" class="tabcontent">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🔬</div>
+        <h2>Run Prediction</h2>
+      </div>
+      <div class="input-group">
+        <span class="input-label">Input Features</span>
+        <div class="input-row">
+          <input id="inputFeatures" placeholder="e.g. 0.12, 0.45, 1.23, …" />
+          <button class="btn-predict" onclick="predict()">Predict</button>
+        </div>
+      </div>
+      <p id="result"></p>
+    </div>
+  </div>
 
-<div id="importance" class="tabcontent">
+  <script src="/static/script.js"></script>
 
-<h2>Global Feature Importance (SHAP)</h2>
-
-<p>
-This chart shows the most influential speech biomarkers used by the model.
-</p>
-
-<img src="/static/feature_importance.png" width="800">
-
-</div>
-
-
-<!-- ================= BIAS VARIANCE ================= -->
-
-<div id="bias" class="tabcontent">
-
-<h2>Model Bias-Variance Curve</h2>
-
-<p>
-This learning curve shows how model performance changes as training data increases.
-</p>
-
-<img src="/static/learning_curve.png" width="800">
-
-</div>
-
-
-<!-- ================= PREDICTION ================= -->
-
-<div id="prediction" class="tabcontent">
-
-<h2>Parkinson Prediction</h2>
-
-<p>
-Enter speech feature values separated by commas.
-</p>
-
-<textarea 
-id="inputFeatures"
-rows="4"
-cols="80"
-placeholder="Example: 0.85,0.71,0.57,240,239,...">
-</textarea>
-
-<br><br>
-
-<button onclick="predict()">Predict</button>
-
-<h3 id="result"></h3>
-
-<h3>Prediction Explanation</h3>
-
-<canvas id="shapChart" width="800" height="400"></canvas>
-
-</div>
-
-
-<script src="/static/script.js"></script>
-
-<script>
-
-document.addEventListener("DOMContentLoaded", function() {
-    openTab("importance");
-});
-
-</script>
+  <script>
+    function openTab(tabId, btn) {
+      // Hide all tabs
+      document.querySelectorAll('.tabcontent').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
+      // Show selected
+      document.getElementById(tabId).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+  </script>
 
 </body>
-
 </html>
